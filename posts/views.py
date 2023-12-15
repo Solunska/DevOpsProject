@@ -3,16 +3,20 @@ from .models import Post, Comment, UserProfile
 from .forms import PostForm, BlockedUsersForm
 from django.contrib.auth.models import User
 from django.shortcuts import redirect
+from .decorators import login_not_required
+from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
-
+@login_not_required
 def posts_view(request):
-    blocked_users = request.user.userprofile.blocked_users.all()
-    posts = Post.objects.exclude(author__in=blocked_users).exclude(author=request.user)
+    # blocked_users = request.user.userprofile.blocked_users.all()
+    # posts = Post.objects.exclude(author__in=blocked_users).exclude(author=request.user)
+    posts = Post.objects.all()  # Get all posts without considering blocked users
     return render(request, 'posts.html', {'posts': posts})
 
 
+@login_not_required
 def add_view(request):
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
@@ -27,6 +31,8 @@ def add_view(request):
     return render(request, 'add.html', context=context)
 
 
+@login_required(login_url='/admin/')
+@login_not_required
 def profile_view(request):
     user = request.user
     profile = user.userprofile
@@ -34,6 +40,7 @@ def profile_view(request):
     return render(request, 'profile.html', {'profile': profile, 'posts': posts})
 
 
+@login_not_required
 def blocked_users_view(request):
     user_profile = UserProfile.objects.get(user=request.user)
     user_profiles = User.objects.exclude(id=request.user.id)
