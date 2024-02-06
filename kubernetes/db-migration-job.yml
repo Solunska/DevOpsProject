@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: django-db-job-secret
+  namespace: django-namespace
+type: Opaque
+data:
+  password: cG9zdGdyZXM=
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: django-migrate
+  namespace: django-namespace
+spec:
+  template:
+    spec:
+      containers:
+        - name: django
+          image: solunska/devops_project_image:latest
+          command: ["/bin/sh","-c"]
+          args: ["python manage.py makemigrations django && python manage.py migrate"]
+          env:
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: django-db-job-secret
+                  key: password
+            - name: POSTGRES_HOST
+              value: "db"
+            - name: POSTGRES_NAME
+              value: "djangoPostsDB"
+      restartPolicy: Never
+  backoffLimit: 5
