@@ -38,4 +38,4 @@ cd kubernetes
 ```bash
 kubectl apply -f namespace.yml -f db.yml -f db-migration-job.yml deployment.yml -f service.yml -f ingress.yml 
 ```
-**the order of the manifests matters**
+**The order of the manifests matters**
